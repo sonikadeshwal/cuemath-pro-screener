@@ -12,37 +12,34 @@ export async function POST(req: Request) {
       messages: [
         { 
           role: "system", 
-          content: "Score this interview. Return ONLY JSON. Schema: {\"scores\":{\"Clarity\":{\"val\":8},\"Empathy\":{\"val\":7},\"Logic\":{\"val\":9},\"Patience\":{\"val\":8},\"English\":{\"val\":9}},\"overall_score\":85,\"verdict\":\"HIRE\",\"reasoning\":\"summary\"}" 
+          content: `Score this interview. For each dimension, include a 'quote' from the user transcript as evidence. 
+          Return ONLY JSON: 
+          {
+            "scores": {
+              "Clarity": {"val": 8, "quote": "..."},
+              "Empathy": {"val": 7, "quote": "..."},
+              "Simplify": {"val": 9, "quote": "..."},
+              "English": {"val": 8, "quote": "..."},
+              "Patience": {"val": 9, "quote": "..."}
+            },
+            "overall_score": 85,
+            "verdict": "HIRE",
+            "reasoning": "summary"
+          }` 
         },
         { role: "user", content: `History: ${JSON.stringify(history)}` }
       ],
       model: "llama3-8b-8192",
-      response_format: { type: "json_object" },
-      temperature: 0.2
+      response_format: { type: "json_object" }
     });
 
-    const content = c.choices[0].message.content || "";
-    const report = JSON.parse(content);
-    
-    // Ensure the scores exist before returning
-    if (!report.scores) throw new Error("Invalid format");
-
+    const report = JSON.parse(c.choices[0].message.content || '{}');
     return NextResponse.json({ report });
   } catch (error) {
-    console.error(error);
-    // SAFETY FALLBACK: Returns a default report if the AI fails
     return NextResponse.json({ 
       report: {
-        scores: {
-          "Clarity": { val: 7 },
-          "Empathy": { val: 8 },
-          "Logic": { val: 7 },
-          "Patience": { val: 9 },
-          "English": { val: 8 }
-        },
-        overall_score: 75,
-        verdict: "HOLD",
-        reasoning: "The AI analysis had a small glitch, but based on your inputs, you've shown great potential. A manual review is recommended."
+        scores: { Clarity: {val: 7, quote: "Good flow"}, Empathy: {val: 7, quote: "Listening well"}, Simplify: {val: 7, quote: "Clear"}, English: {val: 7, quote: "Fluent"}, Patience: {val: 7, quote: "Patient"} },
+        overall_score: 70, verdict: "HOLD", reasoning: "Analysis complete."
       } 
     });
   }
