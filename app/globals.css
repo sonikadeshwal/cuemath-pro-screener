@@ -1,0 +1,4 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+body { background: #050508; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+.text-gradient { background: linear-gradient(135deg, #fff 0%, #ff6b00 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; }
