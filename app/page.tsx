@@ -126,46 +126,69 @@ export default function Page() {
           </motion.div>
         )}
 
+              {/* 🔥 NEW PREMIUM REPORT UI */}
         {stage === 2 && report && (
-          <motion.div key="s2" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass p-12 max-w-6xl w-full text-left">
-            <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-10">
+          <motion.div key="s2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass p-12 max-w-6xl w-full text-left relative overflow-hidden">
+            {/* Background Glow Effect */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-600/20 blur-[100px] rounded-full" />
+            
+            <div className="flex justify-between items-end mb-12 relative z-10">
               <div>
-                <h2 className="text-5xl font-black mb-2">{name}</h2>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Tutor Assessment Result</p>
+                <h2 className="text-6xl font-black mb-2 tracking-tighter uppercase">{name}</h2>
+                <div className="flex items-center gap-3">
+                  <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${report.verdict === 'HIRE' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                    {report.verdict}
+                  </span>
+                  <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest italic">Assessment Complete</span>
+                </div>
               </div>
               <div className="text-right">
-                <div className="text-6xl font-black text-orange-500">{report.overall_score}<span className="text-xl text-gray-700">/100</span></div>
-                <div className="text-sm font-black text-green-500 tracking-tighter uppercase">{report.verdict}</div>
+                <div className="text-8xl font-black text-white leading-none">{report.overall_score}<span className="text-xl text-gray-700 font-bold tracking-normal italic ml-2">pts</span></div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-10">
-              {Object.entries(report.scores).map(([k, v]: any) => (
-                <div key={k} className="p-6 bg-white/5 border border-white/5 rounded-3xl">
-                  <p className="text-[10px] text-gray-500 uppercase font-black mb-3">{k}</p>
-                  <p className="text-3xl font-black mb-4">{v.val}/10</p>
-                  <p className="text-[10px] text-blue-400 italic">"{v.quote}"</p>
+            {/* Unique Grid: Dimension Breakdown with Progress Bars */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-10 relative z-10">
+              {Object.entries(report.scores || {}).map(([k, v]: any) => (
+                <div key={k} className="p-6 bg-white/5 border border-white/10 rounded-[32px] hover:bg-white/10 transition-all group">
+                  <p className="text-[10px] text-gray-500 uppercase font-bold mb-3 group-hover:text-orange-500 transition-colors tracking-widest">{k}</p>
+                  <p className="text-4xl font-black mb-4">{v.val || 0}</p>
+                  <div className="w-full h-1 bg-white/5 rounded-full mb-4 overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${(v.val || 0) * 10}%` }} className="h-full bg-orange-600 shadow-[0_0_10px_#ff6b00]" />
+                  </div>
+                  <p className="text-[9px] text-gray-400 italic leading-tight">&quot;{v.quote}&quot;</p>
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-              <div className="p-8 bg-blue-600/5 rounded-[40px] border border-blue-600/10 text-xs">
-                 <h4 className="flex items-center gap-2 text-blue-400 font-bold mb-6 uppercase tracking-widest"><Sparkles size={16} /> Model Answer</h4>
-                 <p className="text-gray-300 italic font-light leading-relaxed">{report.model_answer}</p>
-              </div>
-              <div className="p-8 bg-white/5 rounded-[40px] border border-white/10 text-xs text-gray-300 font-light leading-relaxed">
-                 <h4 className="flex items-center gap-2 text-orange-500 font-bold mb-6 uppercase tracking-widest"><Brain size={16} /> Conclusion</h4>
-                 <p>{report.reasoning}</p>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+               {/* 💡 AI Insights Section */}
+               <div className="lg:col-span-2 p-10 bg-white/5 rounded-[48px] border border-white/5">
+                 <div className="flex items-center gap-2 mb-6">
+                   <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><Sparkles size={16} /></div>
+                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Cuemath Pedagogical Guide</h4>
+                 </div>
+                 <p className="text-xl text-gray-300 font-light leading-relaxed italic">&quot;{report.model_answer}&quot;</p>
+               </div>
+
+               {/* 🏆 Result Card */}
+               <div className="p-10 bg-orange-600 rounded-[48px] text-white flex flex-col justify-between shadow-2xl shadow-orange-600/30">
+                 <div>
+                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 opacity-60 text-white">Executive Reasoning</h4>
+                   <p className="text-lg font-bold leading-tight">{report.reasoning}</p>
+                 </div>
+                 <button onClick={() => window.print()} className="mt-10 py-5 bg-black text-white rounded-3xl font-black flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all">
+                   <Download size={20} /> DOWNLOAD REPORT
+                 </button>
+               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button onClick={() => window.print()} className="flex-1 py-6 bg-orange-600 rounded-[32px] font-black text-xl flex items-center justify-center gap-3 active:scale-95 transition-all"><Download /> SAVE AS PDF</button>
-              <button onClick={() => window.location.reload()} className="px-12 py-6 border border-white/10 rounded-[32px] font-black hover:bg-white/5">RETRY</button>
+            <div className="mt-10 text-center">
+              <button onClick={() => window.location.reload()} className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-all">New Candidate Review</button>
             </div>
           </motion.div>
         )}
+
 
       </AnimatePresence>
     </div>
