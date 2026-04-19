@@ -15,6 +15,13 @@ export default function Page() {
   const [timeLeft, setTimeLeft] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
 
+  // 📥 NEW: Randomized Question Bank
+  const QUESTIONS = [
+    { text: "Hi! I'm Rohan. My teacher says 1/2 is bigger than 1/4, but 4 is bigger than 2! Why is that? Isn't she wrong?", topic: "fractions" },
+    { text: "Hi! I'm Rohan. My friend says 0.5 is bigger than 0.05, but 5 is the same as 5! Why does the extra zero make it smaller?", topic: "decimals" },
+    { text: "Hi! I'm Rohan. My dad said multiplication always makes numbers bigger, but 10 times 1/2 is only 5! Is he lying?", topic: "multiplication" }
+  ];
+
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
@@ -32,16 +39,19 @@ export default function Page() {
 
   const start = () => {
     if (!name.trim()) return alert("Enter candidate name");
+    
+    // 🎲 Pick a random question from the bank
+    const q = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+    
     setStage(1);
     setTimerActive(true);
-    const m = "Hi! I'm Rohan. My teacher says 1/2 is bigger than 1/4, but 4 is bigger than 2! Why is that? Isn't she wrong?";
-    setMessages([{ role: "bot", text: m }]);
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(m));
+    setMessages([{ role: "bot", text: q.text, topic: q.topic }]); // Store topic for AI evaluation
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(q.text));
   };
 
   const toggleMic = () => {
     const Rec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!Rec) return alert("Translate browser voice not supported");
+    if (!Rec) return alert("Browser voice support not found");
     const rec = new Rec();
     rec.onresult = (e: any) => handleMsg(e.results[0][0].transcript);
     rec.onstart = () => setIsListening(true);
@@ -71,7 +81,7 @@ export default function Page() {
       setReport(d.report);
       setStage(2);
     } catch (e) {
-      setReport({ scores: { Clarity: {val: 7, quote: "N/A"}, Empathy: {val: 8, quote: "N/A"}, Simplify: {val: 6, quote: "N/A"}, English: {val: 9, quote: "N/A"}, Patience: {val: 9, quote: "N/A"} }, overall_score: 75, verdict: "HOLD", reasoning: "Automatic review is busy.", model_answer: "Explanation should focus on denominator size." });
+      setReport({ scores: { Clarity: {val: 7, quote: "N/A"}, Empathy: {val: 8, quote: "N/A"}, Simplify: {val: 6, quote: "N/A"}, English: {val: 9, quote: "N/A"}, Patience: {val: 9, quote: "N/A"} }, overall_score: 75, verdict: "HOLD", reasoning: "Automatic review is busy.", model_answer: "Explanation should focus on fractional logic." });
       setStage(2);
     }
   };
@@ -126,10 +136,8 @@ export default function Page() {
           </motion.div>
         )}
 
-              {/* 🔥 NEW PREMIUM REPORT UI */}
         {stage === 2 && report && (
           <motion.div key="s2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass p-12 max-w-6xl w-full text-left relative overflow-hidden">
-            {/* Background Glow Effect */}
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-600/20 blur-[100px] rounded-full" />
             
             <div className="flex justify-between items-end mb-12 relative z-10">
@@ -147,7 +155,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Unique Grid: Dimension Breakdown with Progress Bars */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-10 relative z-10">
               {Object.entries(report.scores || {}).map(([k, v]: any) => (
                 <div key={k} className="p-6 bg-white/5 border border-white/10 rounded-[32px] hover:bg-white/10 transition-all group">
@@ -162,7 +169,6 @@ export default function Page() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-               {/* 💡 AI Insights Section */}
                <div className="lg:col-span-2 p-10 bg-white/5 rounded-[48px] border border-white/5">
                  <div className="flex items-center gap-2 mb-6">
                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><Sparkles size={16} /></div>
@@ -171,7 +177,6 @@ export default function Page() {
                  <p className="text-xl text-gray-300 font-light leading-relaxed italic">&quot;{report.model_answer}&quot;</p>
                </div>
 
-               {/* 🏆 Result Card */}
                <div className="p-10 bg-orange-600 rounded-[48px] text-white flex flex-col justify-between shadow-2xl shadow-orange-600/30">
                  <div>
                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 opacity-60 text-white">Executive Reasoning</h4>
@@ -188,7 +193,6 @@ export default function Page() {
             </div>
           </motion.div>
         )}
-
 
       </AnimatePresence>
     </div>
