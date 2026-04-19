@@ -12,32 +12,34 @@ export async function POST(req: Request) {
       messages: [
         { 
           role: "system", 
-          content: `You are a COLD, CALCULATING Auditor for Cuemath. 
+          content: `You are a Fair but Strict Cuemath Interviewer. 
           
-          THE "AUTO-FAIL" RULES:
-          1. If the candidate says things like "I like coffee", "Hello", "How are you" without explaining math, they get 0.
-          2. If the total user messages are less than 2, they get 0.
-          3. If their explanation is logically wrong for ${topic}, they get 0.
+          THE EVALUATION STEP:
+          1. RELEVANCE CHECK: Does the candidate explain ${topic}? If they talk about coffee, random objects, or say 'I don't know', they must get 0.
+          2. PEDAGOGY CHECK: Did they use a good analogy? (e.g., for fractions, did they talk about pizza slices or the size of parts?).
           
-          You MUST return ONLY JSON: 
-          {"scores":{"Clarity":{"val":0,"quote":"..."},"Empathy":{"val":0,"quote":"..."},"Simplify":{"val":0,"quote":"..."},"English":{"val":0,"quote":"..."},"Patience":{"val":0,"quote":"..."}},"overall_score":0,"verdict":"NO-HIRE","reasoning":"Briefly explain why they failed (e.g., 'Candidate talked about coffee instead of fractions')","model_answer":"The correct way to explain this is..."}` 
+          SCORING:
+          If they explained the math concept, even in one message, score them fairly (1-10). 
+          Only give 0 if they are completely off-topic or silent.
+          
+          Return ONLY JSON: 
+          {"scores":{"Clarity":{"val":0-10,"quote":".."},"Empathy":{"val":0-10,"quote":".."},"Simplify":{"val":0-10,"quote":".."},"English":{"val":0-10,"quote":".."},"Patience":{"val":0-10,"quote":".."}},"overall_score":0-100,"verdict":"HIRE"|"HOLD"|"NO-HIRE","reasoning":"..","model_answer":".."}` 
         },
-        { role: "user", content: `Math Topic: ${topic}. Transcript to Audit: ${JSON.stringify(history)}` }
+        { role: "user", content: `Math Topic: ${topic}. Full transcript: ${JSON.stringify(history)}` }
       ],
       model: "llama3-8b-8192",
       response_format: { type: "json_object" },
-      temperature: 0, // 0 = Absolute consistency
+      temperature: 0.2, // Small amount of flexibility
     });
 
     const report = JSON.parse(c.choices[0].message.content || '{}');
     return NextResponse.json({ report });
   } catch (error) {
-    // 🛡️ NEW SAFETY FALLBACK (0 Score)
-    // If the system fails, we assume the candidate didn't provide enough data
+    // Return a neutral "System Busy" report instead of zero
     return NextResponse.json({ 
       report: {
-        scores: { Clarity: {val: 0, quote: "N/A"}, Empathy: {val: 0, quote: "N/A"}, Simplify: {val: 0, quote: "N/A"}, English: {val: 0, quote: "N/A"}, Patience: {val: 0, quote: "N/A"} },
-        overall_score: 0, verdict: "REJECT", reasoning: "System timeout or insufficient data provided by candidate.", model_answer: "Insufficient data to provide model answer."
+        scores: { Clarity: {val: 5, quote: "N/A"}, Empathy: {val: 5, quote: "N/A"}, Simplify: {val: 5, quote: "N/A"}, English: {val: 5, quote: "N/A"}, Patience: {val: 5, quote: "N/A"} },
+        overall_score: 50, verdict: "HOLD", reasoning: "Analysis engine is busy. Please review transcript manually.", model_answer: "Explanation should focus on visualization."
       } 
     });
   }
