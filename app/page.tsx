@@ -12,13 +12,11 @@ export default function Page() {
   const [messages, setMessages] = useState<any[]>([]);
   const [report, setReport] = useState<any>(null);
   
-  // ⏱️ TIMER STATE
-  const [timeLeft, setTimeLeft] = useState(600); // 10 Minutes
+  const [timeLeft, setTimeLeft] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  // ⏱️ TIMER LOGIC
   useEffect(() => {
     let interval: any;
     if (timerActive && timeLeft > 0) {
@@ -43,7 +41,7 @@ export default function Page() {
 
   const toggleMic = () => {
     const Rec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!Rec) return alert("Browser voice not supported");
+    if (!Rec) return alert("Translate browser voice not supported");
     const rec = new Rec();
     rec.onresult = (e: any) => handleMsg(e.results[0][0].transcript);
     rec.onstart = () => setIsListening(true);
@@ -73,8 +71,7 @@ export default function Page() {
       setReport(d.report);
       setStage(2);
     } catch (e) {
-      alert("Evaluation timed out. Showing manual scoring...");
-      setReport({ scores: { Clarity: {val: 7, quote: "N/A"}, Empathy: {val: 8, quote: "N/A"}, Simplify: {val: 6, quote: "N/A"}, English: {val: 9, quote: "N/A"}, Patience: {val: 9, quote: "N/A"} }, overall_score: 75, verdict: "HOLD", reasoning: "Automatic review is busy. Please evaluate the transcript manually.", model_answer: "Explanation should focus on denominator size." });
+      setReport({ scores: { Clarity: {val: 7, quote: "N/A"}, Empathy: {val: 8, quote: "N/A"}, Simplify: {val: 6, quote: "N/A"}, English: {val: 9, quote: "N/A"}, Patience: {val: 9, quote: "N/A"} }, overall_score: 75, verdict: "HOLD", reasoning: "Automatic review is busy.", model_answer: "Explanation should focus on denominator size." });
       setStage(2);
     }
   };
@@ -83,9 +80,8 @@ export default function Page() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col items-center justify-center p-6 text-center">
       <AnimatePresence mode="wait">
         
-        {/* STAGE 0: ONBOARDING */}
         {stage === 0 && (
-          <motion.div key="s0" border initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass p-12 max-w-lg w-full text-center">
+          <motion.div key="s0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass p-12 max-w-lg w-full text-center">
             <Bot size={60} className="text-orange-500 mx-auto mb-6" />
             <h1 className="text-4xl font-black mb-4 text-gradient uppercase tracking-tighter">Cuemath Screener</h1>
             <p className="text-gray-500 mb-10 text-sm">Professional AI Assessment Stage</p>
@@ -94,7 +90,6 @@ export default function Page() {
           </motion.div>
         )}
 
-        {/* STAGE 1: SIMULATION */}
         {stage === 1 && (
           <motion.div key="s1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-4xl w-full flex flex-col h-[85vh] relative">
             <div className={`fixed top-10 right-10 px-6 py-3 rounded-2xl border font-mono text-2xl font-black ${timeLeft < 60 ? 'text-red-500 border-red-500 animate-pulse' : 'text-gray-400 border-white/10'}`}>
@@ -109,7 +104,6 @@ export default function Page() {
                     </div>
                  </div>
                ))}
-               {isListening && <div className="text-left text-orange-500 font-bold animate-pulse text-xs ml-4">ROHAN IS LISTENING...</div>}
             </div>
             
             <div className="bg-white/5 border border-white/10 p-4 rounded-[40px] flex gap-4 items-center shadow-2xl">
@@ -125,16 +119,13 @@ export default function Page() {
           </motion.div>
         )}
 
-        {/* STAGE 1.5: LOADING */}
         {stage === 1.5 && (
           <motion.div key="load" className="text-center">
             <Loader2 className="w-16 h-16 text-orange-500 animate-spin mx-auto mb-6" />
             <h2 className="text-3xl font-black text-gradient uppercase">Generating Report</h2>
-            <p className="text-gray-600">Checking for pedagogical accuracy...</p>
           </motion.div>
         )}
 
-        {/* STAGE 2: REPORT */}
         {stage === 2 && report && (
           <motion.div key="s2" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass p-12 max-w-6xl w-full text-left">
             <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-10">
@@ -159,13 +150,13 @@ export default function Page() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-              <div className="p-8 bg-blue-600/5 rounded-[40px] border border-blue-600/10">
-                 <h4 className="flex items-center gap-2 text-blue-400 font-bold text-xs mb-6 uppercase tracking-widest"><Sparkles size={16} /> Model Answer</h4>
+              <div className="p-8 bg-blue-600/5 rounded-[40px] border border-blue-600/10 text-xs">
+                 <h4 className="flex items-center gap-2 text-blue-400 font-bold mb-6 uppercase tracking-widest"><Sparkles size={16} /> Model Answer</h4>
                  <p className="text-gray-300 italic font-light leading-relaxed">{report.model_answer}</p>
               </div>
-              <div className="p-8 bg-white/5 rounded-[40px] border border-white/10">
-                 <h4 className="flex items-center gap-2 text-orange-500 font-bold text-xs mb-6 uppercase tracking-widest"><Brain size={16} /> Conclusion</h4>
-                 <p className="text-gray-300 font-light leading-relaxed">{report.reasoning}</p>
+              <div className="p-8 bg-white/5 rounded-[40px] border border-white/10 text-xs text-gray-300 font-light leading-relaxed">
+                 <h4 className="flex items-center gap-2 text-orange-500 font-bold mb-6 uppercase tracking-widest"><Brain size={16} /> Conclusion</h4>
+                 <p>{report.reasoning}</p>
               </div>
             </div>
 
