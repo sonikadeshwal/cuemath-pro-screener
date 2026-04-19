@@ -1,20 +1,36 @@
-// REMOVE THE EDGE RUNTIME - Standard Vercel functions are more stable for this
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
-
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: Request) {
   try {
     const { history } = await req.json();
+    
+    // 🧠 GET THE TOPIC FROM THE FIRST MESSAGE
+    // This tells the AI if it should be checking for Fractions, Decimals, or Multiplication
+    const topic = history[0]?.topic || "fractions"; 
 
     const c = await groq.chat.completions.create({
       messages: [
         { 
           role: "system", 
-          content: "Score this interview strictly. Return ONLY JSON: {\"scores\":{\"Clarity\":{\"val\":8,\"quote\":\"..\"},\"Empathy\":{\"val\":7,\"quote\":\"..\"},\"Simplifying\":{\"val\":9,\"quote\":\"..\"},\"English\":{\"val\":8,\"quote\":\"..\"},\"Patience\":{\"val\":9,\"quote\":\"..\"}},\"overall_score\":82,\"verdict\":\"HIRE\",\"reasoning\":\"summary\",\"model_answer\":\"...\"}" 
+          content: `You are a STRICT Cuemath Auditor evaluating a tutor.
+          
+          THE TARGET TOPIC: ${topic}
+          
+          THE "COFFEE" RULE (STRICT):
+          - If the candidate talks about things unrelated to ${topic} (like 'I like coffee', 'how are you', or random gibberish), you MUST give 0 points for every category.
+          - In such cases, Verdict must be "NO-HIRE" and Reasoning must say "Candidate failed to address the student's question."
+          
+          EVALUATION CRITERIA:
+          - Did they simplify ${topic} for a 9-year-old?
+          - Did they use Cuemath-style logic?
+          
+          Return ONLY JSON: 
+          {"scores":{"Clarity":{"val":0-10,"quote":".."},"Empathy":{"val":0-10,"quote":".."},"Simplify":{"val":0-10,"quote":".."},"English":{"val":0-10,"quote":".."},"Patience":{"val":0-10,"quote":".."}},"overall_score":0-100,"verdict":"HIRE"|"HOLD"|"NO-HIRE","reasoning":"..","model_answer":".."} ` 
         },
-        { role: "user", content: JSON.stringify(history) }
+        { role: "user", content: `Interview Transcript: ${JSON.stringify(history)}` }
       ],
       model: "llama3-8b-8192",
       response_format: { type: "json_object" }
@@ -23,12 +39,6 @@ export async function POST(req: Request) {
     const report = JSON.parse(c.choices[0].message.content || '{}');
     return NextResponse.json({ report });
   } catch (error) {
-    // Return a default report so it NEVER shows a blank screen
-    return NextResponse.json({ 
-      report: {
-        scores: { Clarity: {val: 7, quote: "Good flow"}, Empathy: {val: 6, quote: "Responsive"}, Simplifying: {val: 7, quote: "Detailed"}, English: {val: 8, quote: "Fluent"}, Patience: {val: 7, quote: "Patient"} },
-        overall_score: 72, verdict: "HOLD", reasoning: "Analysis completed. The candidate showed good foundational skills.", model_answer: "Focus on using analogies for fractions."
-      } 
-    });
+    return NextResponse.json({ error: "Fail" }, { status: 500 });
   }
 }
