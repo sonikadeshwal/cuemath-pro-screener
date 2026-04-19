@@ -72,19 +72,30 @@ export default function Page() {
     } catch (e) { console.error(e); }
   };
 
-  const finish = async () => {
+   const finish = async () => {
     setTimerActive(false);
     setStage(1.5);
     try {
-      const r = await fetch("/api/evaluate", { method: "POST", body: JSON.stringify({ history: messages }) });
+      const r = await fetch("/api/evaluate", { 
+        method: "POST", 
+        body: JSON.stringify({ history: messages }),
+        headers: { "Content-Type": "application/json" }
+      });
       const d = await r.json();
-      setReport(d.report);
-      setStage(2);
+      if (d.report) {
+        setReport(d.report);
+        setStage(2);
+      } else {
+        throw new Error("No report");
+      }
     } catch (e) {
-      setReport({ scores: { Clarity: {val: 7, quote: "N/A"}, Empathy: {val: 8, quote: "N/A"}, Simplify: {val: 6, quote: "N/A"}, English: {val: 9, quote: "N/A"}, Patience: {val: 9, quote: "N/A"} }, overall_score: 75, verdict: "HOLD", reasoning: "Automatic review is busy.", model_answer: "Explanation should focus on fractional logic." });
+      console.error(e);
+      // Fallback
+      setReport({ scores: { Clarity: {val: 5, quote: "N/A"}, Empathy: {val: 5, quote: "N/A"}, Simplify: {val: 5, quote: "N/A"}, English: {val: 5, quote: "N/A"}, Patience: {val: 5, quote: "N/A"} }, overall_score: 50, verdict: "RETRY", reasoning: "System busy.", model_answer: "N/A" });
       setStage(2);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col items-center justify-center p-6 text-center">
