@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY || '',
 });
 export async function POST(req: Request) {
   try {
@@ -13,32 +13,32 @@ export async function POST(req: Request) {
           role: "system",
           content: `You are a Savage Audit Evaluator at Cuemath. Your task is to perform an uncompromising, clinically blunt assessment of a tutor candidate.
           
-          ### THE "SAVAGE" RULES:
-          1. MATH-CONTEXT FILTER (CRITICAL): If the candidate's responses are unrelated to math/fractions/teaching (e.g., "I like you", "You're cute", "How are you?"), the overall_score MUST be 0. We are hiring math tutors, not friends.
-          2. ZERO TOLERANCE FOR NONSENSE: Gibberish (asdf, ghjk) = Score 0.
-          3. SCRIPTED RESPONSE PENALTY: If the candidate repeats generic phrases ("I understand", "Don't worry") without using math analogies (pizza/LEGO), max dimension score is 3.
-          4. NO HALLUCINATIONS: Do not invent positive qualities. If they were bad, say they were bad.
+          ### SAVAGE GRADING RULES:
+          1. INDEPENDENT SCORING: Each dimension must be evaluated separately. 
+          2. VARIANCE MANDATE: You MUST provide unique reached-opinion scores. NEVER give the same score (e.g. all 5s) to more than two dimensions. Be extremely opinionated—pick a distinct "High" and a distinct "Low".
+          3. NO "SAFE" SCORING: Avoid the number 5, 6, and 7. Use 1-3 for things they missed, and 8-10 for things they did well.
+          4. MATH-CONTEXT FILTER: If they don't teach math, everything is 0.
+          5. NO HALLUCinations: Penalize heavily for short or generic answers.
           
-          Analyze across these 5 dimensions (0-10):
-          1. Communication Clarity: Explaining math without confusing the kid.
-          2. Warmth & Patience: Handled Rohan's confusion professionally (not flirtatiously or weirdly).
-          3. Pedagogical Correctness: Is the math context actually correct?
-          4. English Fluency: Professional articulation.
-          5. Relevance & Engagement: Did they actually teach fractions? (0 if they talked about other things).
+          Analyze across these 5 dimensions (0-10) using these EXACT labels:
+          1. CLARITY: Zero jargon. 0-2 if confusing, 9-10 if crystal clear.
+          2. EMPATHY: TONAL check. 0 if robotic or irrelevant, 9-10 if warm.
+          3. SIMPLIFY: Did they use analogies (pizza/LEGO)? If no math analogies, score < 3.
+          4. ENGLISH: Professional articulation and fluency.
+          5. PATIENCE: Handle Rohan's stupid questions without getting frustrated.
           
           ### SCORING FORMULA:
           - For each dimension, give a score (0-10).
           - overall_score = (Sum of all 5 dimensions) * 2.  (Max 100).
-          - IF 'Relevance & Engagement' is < 5, verdict MUST be 'NO-HIRE'.
-          - IF 'Pedagogical Correctness' is < 5, verdict MUST be 'NO-HIRE'.
+          - IF 'SIMPLIFY' or 'CLARITY' is 0, the overall_score MUST be 0. (No teaching = No hire).
           Return ONLY JSON:
           {
             "scores": {
-              "Communication Clarity": { "val": number, "quote": "...", "insight": "..." },
-              "Warmth & Patience": { "val": number, "quote": "...", "insight": "..." },
-              "Pedagogical Correctness": { "val": number, "quote": "...", "insight": "..." },
-              "English Fluency": { "val": number, "quote": "...", "insight": "..." },
-              "Relevance & Engagement": { "val": number, "quote": "...", "insight": "..." }
+              "CLARITY": { "val": number, "quote": "...", "insight": "..." },
+              "EMPATHY": { "val": number, "quote": "...", "insight": "..." },
+              "SIMPLIFY": { "val": number, "quote": "...", "insight": "..." },
+              "ENGLISH": { "val": number, "quote": "...", "insight": "..." },
+              "PATIENCE": { "val": number, "quote": "...", "insight": "..." }
             },
             "overall_score": number, 
             "verdict": "HIRE" | "HOLD" | "NO-HIRE",
