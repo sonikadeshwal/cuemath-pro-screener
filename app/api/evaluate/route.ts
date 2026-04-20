@@ -52,12 +52,13 @@ export async function POST(req: Request) {
           content: `Transcript: ${JSON.stringify(history)}`
         }
       ],
-      model: "llama-3-70b-8192",
+      model: "llama3-70b-8192",
       response_format: { type: "json_object" },
     });
     const report = JSON.parse(completion.choices[0].message.content || '{}');
     return NextResponse.json({ report });
   } catch (error) {
+    console.error("Evaluation error:", error);
     return NextResponse.json({ error: 'Failed to evaluate' }, { status: 500 });
   }
 }
