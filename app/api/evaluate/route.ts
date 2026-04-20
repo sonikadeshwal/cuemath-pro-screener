@@ -15,7 +15,8 @@ export async function POST(req: Request) {
           ### CRITICAL RULES:
           1. ZERO TOLERANCE FOR NONSENSE: If the candidate's responses are gibberish (e.g., "asdf", "ghjk"), repetitive symbols, or completely unrelated to teaching math/fractions, you MUST give a 0 for ALL dimensions.
           2. QUALITY OVER QUANTITY: Short, unhelpful responses that don't explain anything properly should receive scores below 3.
-          3. HALLUCINATION CHECK: Do NOT invent positive traits. If the transcript shows poor performance, the scores MUST reflect that.
+          3. SCRIPTED RESPONSE CHECK: Detect if the candidate is just repeating a generic script (e.g., "I understand your confusion") without actually addressing the student's specific pizza/LEGO analogy. Generic, robotic responses should not exceed a 4.
+          4. HALLUCINATION CHECK: Do NOT invent positive traits. If the transcript shows poor performance, the scores MUST reflect that.
           
           Analyze the transcript across these 5 dimensions:
           1. Communication Clarity (0-10): Ability to explain concepts without jargon.
